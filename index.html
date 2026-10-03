@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сто тысяч миллиардов стихотворений</title>
+    <style>
+        :root {
+            /* Цвета для 5 исходных стихотворений */
+            --color-1: #3498db; /* Синий */
+            --color-2: #2ecc71; /* Зеленый */
+            --color-3: #e74c3c; /* Красный */
+            --color-4: #9b59b6; /* Фиолетовый */
+            --color-5: #f39c12; /* Оранжевый */
+            --bg-color: #fdfbf7;
+            --text-color: #2c3e50;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .description {
+            text-align: center;
+            margin-bottom: 30px;
+            font-style: italic;
+            color: #7f8c8d;
+            max-width: 600px;
+        }
+
+        .controls-top {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #fff;
+            border: 1px solid #bdc3c7;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        button:hover {
+            background-color: #ecf0f1;
+        }
+
+        .btn-random {
+            background-color: #2c3e50;
+            color: #fff;
+            border-color: #2c3e50;
+        }
+
+        .btn-random:hover {
+            background-color: #1a252f;
+        }
+
+        .poem-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+            max-width: 600px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .line-row {
+            display: flex;
+            align-items: center;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 5px;
+            transition: transform 0.2s;
+        }
+
+        .line-row:hover {
+            background: #f0f0f0;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #7f8c8d;
+            padding: 5px 10px;
+            cursor: pointer;
+            box-shadow: none;
+        }
+
+        .nav-btn:hover {
+            color: #2c3e50;
+            background: none;
+            transform: scale(1.2);
+        }
+
+        .text-container {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 18px;
+            user-select: none;
+        }
+
+        .color-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 10px;
+            margin-right: 5px;
+            flex-shrink: 0;
+            transition: background-color 0.3s;
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Комбинаторная поэзия</h1>
+    <div class="description">
+        9 765 625 вариантов стихотворений. Нажимайте стрелки по бокам строк, чтобы менять их по отдельности, или используйте кнопки ниже для управления всем текстом.
+    </div>
+
+    <div class="controls-top">
+        <button onclick="setPoem(0)">Стих I</button>
+        <button onclick="setPoem(1)">Стих II</button>
+        <button onclick="setPoem(2)">Стих III</button>
+        <button onclick="setPoem(3)">Стих IV</button>
+        <button onclick="setPoem(4)">Стих V</button>
+        <button class="btn-random" onclick="setRandom()">Случайный стих</button>
+    </div>
+
+    <div class="poem-container" id="poem-container">
+        <!-- Строки будут сгенерированы через JS -->
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background-color: var(--color-1);"></div> Стих I</div>
+        <div class="legend-item"><div class="legend-color" style="background-color: var(--color-2);"></div> Стих II</div>
+        <div class="legend-item"><div class="legend-color" style="background-color: var(--color-3);"></div> Стих III</div>
+        <div class="legend-item"><div class="legend-color" style="background-color: var(--color-4);"></div> Стих IV</div>
+        <div class="legend-item"><div class="legend-color" style="background-color: var(--color-5);"></div> Стих V</div>
+    </div>
+
+    <script>
+        // Исходные данные: 10 массивов (по одному на каждую позицию строки). 
+        // В каждом массиве 5 вариантов из 5 исходных стихотворений.
+        const linesData = [
+            [ // Строка 1
+                "Когда угаснет летний зной,",
+                "Покуда дымка над рекой,",
+                "Едва рассеется покой,",
+                "В глуши, окутанной тоской,",
+                "Забыв про суетный настрой,"
+            ],
+            [ // Строка 2
+                "Земля объята тишиной.",
+                "Горит лампадой свод ночной.",
+                "Трепещет парус над волной.",
+                "Ложится сумрак под сосной.",
+                "Течёт ручей тропой лесной."
+            ],
+            [ // Строка 3
+                "Храня старинные преданья,",
+                "Внимая шорохам дыханья,",
+                "Пройдя сквозь долгие скитанья,",
+                "Прервав напрасные стенанья,",
+                "Приняв негромкие признанья,"
+            ],
+            [ // Строка 4
+                "Душа не ведает терзанья.",
+                "Весь сад застыл в плену молчанья.",
+                "Земля не ведает страданья.",
+                "Звезда дарует свет созданья.",
+                "Наш взор не ищет оправданья."
+            ],
+            [ // Строка 5
+                "Небесный купол засиял,",
+                "С небес холодный луч упал,",
+                "Мятежный ветер стих, устал,",
+                "Печальный призрак дня пропал,",
+                "Старинный бор в тени дремал,"
+            ],
+            [ // Строка 6
+                "И лунный свет согрел причал.",
+                "И серебрится перевал.",
+                "И гранью вспыхнул сам кристалл.",
+                "И в бездну рухнул с гор обвал.",
+                "И близок сладостный финал."
+            ],
+            [ // Строка 7
+                "Внушая сладкое забвенье,",
+                "Даруя сердцу вдохновенье,",
+                "Приняв спокойное смиренье,",
+                "Отбросив ложное сомненье,",
+                "Храня надежду на спасенье,"
+            ],
+            [ // Строка 8
+                "Приходит мудрое терпенье.",
+                "Мы ценим вечное мгновенье.",
+                "Ночь длит неспешное горенье.",
+                "Мир ловит чудное свеченье.",
+                "Душа находит утешенье."
+            ],
+            [ // Строка 9
+                "И день грядущий шлёт привет,",
+                "И тьма скрывает древний след,",
+                "И тишина даёт обет,",
+                "И каждый познаёт секрет,",
+                "И мудрый предок шлёт завет,"
+            ],
+            [ // Строка 10
+                "Рождая негасимый свет.",
+                "Даруя на вопрос ответ.",
+                "Спасая землю от всех бед.",
+                "Встречая золотой рассвет.",
+                "Где боли и печали нет."
+            ]
+        ];
+
+        // Массив цветов, соответствующих каждому из 5 стихов
+        const colors = [
+            'var(--color-1)', 
+            'var(--color-2)', 
+            'var(--color-3)', 
+            'var(--color-4)', 
+            'var(--color-5)'
+        ];
+
+        // Текущее состояние: индексы (от 0 до 4) выбранной строки для каждой из 10 позиций
+        let currentState = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+        const container = document.getElementById('poem-container');
+
+        // Инициализация интерфейса
+        function init() {
+            container.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const row = document.createElement('div');
+                row.className = 'line-row';
+
+                // Кнопка влево
+                const btnLeft = document.createElement('button');
+                btnLeft.className = 'nav-btn';
+                btnLeft.innerHTML = '&#9664;';
+                btnLeft.onclick = () => changeLine(i, -1);
+
+                // Контейнер текста
+                const textDiv = document.createElement('div');
+                textDiv.className = 'text-container';
+                textDiv.id = `line-text-${i}`;
+
+                // Цветовой индикатор
+                const indicator = document.createElement('div');
+                indicator.className = 'color-indicator';
+                indicator.id = `line-color-${i}`;
+
+                // Кнопка вправо
+                const btnRight = document.createElement('button');
+                btnRight.className = 'nav-btn';
+                btnRight.innerHTML = '&#9654;';
+                btnRight.onclick = () => changeLine(i, 1);
+
+                row.appendChild(btnLeft);
+                row.appendChild(textDiv);
+                row.appendChild(indicator);
+                row.appendChild(btnRight);
+                container.appendChild(row);
+            }
+            updateUI();
+        }
+
+        // Обновление текста и цветов на основе currentState
+        function updateUI() {
+            for (let i = 0; i < 10; i++) {
+                const poemIndex = currentState[i];
+                document.getElementById(`line-text-${i}`).innerText = linesData[i][poemIndex];
+                document.getElementById(`line-color-${i}`).style.backgroundColor = colors[poemIndex];
+            }
+        }
+
+        // Перелистывание отдельной строки
+        function changeLine(lineIndex, direction) {
+            // +5 чтобы избежать отрицательных чисел при остатке от деления
+            currentState[lineIndex] = (currentState[lineIndex] + direction + 5) % 5;
+            updateUI();
+        }
+
+        // Установка конкретного стихотворения (все 10 строк)
+        function setPoem(poemIndex) {
+            for (let i = 0; i < 10; i++) {
+                currentState[i] = poemIndex;
+            }
+            updateUI();
+        }
+
+        // Случайный выбор строк
+        function setRandom() {
+            for (let i = 0; i < 10; i++) {
+                currentState[i] = Math.floor(Math.random() * 5);
+            }
+            updateUI();
+        }
+
+        // Запуск
+        init();
+    </script>
+</body>
+</html>
